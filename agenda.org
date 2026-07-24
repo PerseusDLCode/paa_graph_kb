@@ -118,13 +118,76 @@ ago. Two versions of it exist now, as Google Spreadsheets. I have
 downloaded the more comprehensive one (prepared by Alison Babeu) into
 a new directory [[file:data/bibliography/][data/bibliography]].
 
+** TODO Integrate aabiblio.csv as Tier-0 lookup, get real end-to-end coverage
+:PROPERTIES:
+:CUSTOM_ID: track-b/citation-resolution-tier0-integration
+:ASSIGNEES: Claude Code
+:SOURCE: chat/2026-07-24
+:DEPENDS: track-b/citation-resolution-pilot
+:END:
+See
+[[file:docs/forum.org::#track-b/aa-bibliography-tier0][docs/forum.org]]
+for the Research and Decision (Cliff: proceed, 2026-07-24). Continue
+on the existing =feature/track-b/citation-resolution-pilot-cascade-pilot=
+branch (already reconciled with =dev= as of this task's creation) —
+don't start a new branch for this.
+
+The pilot (=citation_resolution_pilot.py=,
+=track_b_pilot_results.org=) resolved author-year keys via general
+knowledge alone, topping out at ~21% HIGH confidence, and explicitly
+recommended pairing that with a real external lookup instead.
+=data/bibliography/aabiblio.csv= (3,537 entries) looks like that
+lookup: a quick check (Claude Chat, not committed as code) found
+82.8% of the pilot's 1,677 unique author-year keys match its
+=Identifier= column exactly by string, 91.5% weighted by occurrence.
+This task is to do that properly and get a trustworthy number, not to
+assume the quick check's result holds.
+
+Concretely:
+1. Load =aabiblio.csv=, keyed on =Identifier=. Match all extracted
+   author-year keys (=bibliography_author_year_keys.csv=) against it —
+   report the *raw* exact-match rate first.
+2. Re-run the match after normalizing diacritics on both sides (the
+   corpus has dropped-diacritic keys like =Vierneisel-Schlrb=,
+   =Blmel=, =Ssserott= — flagged in the pilot's data-quality note).
+   Report raw vs. normalized rates separately; don't collapse them
+   into one number.
+3. For matched keys, replace the pilot's =resolved_citation_unverified=
+   free-text guess with the actual =aabiblio.csv= row (title, author,
+   year, WorldCat URL where present) — this is real bibliographic
+   data, not an LLM guess, and should be labeled as such.
+4. For unmatched keys, leave them unresolved — fold into the existing
+   long-tail accounting rather than guessing or inventing a new
+   bucket.
+5. Spot-check (don't assume) whether =aabiblio.csv='s =Identifier=
+   convention also covers any of the abbreviation-tier or
+   OTHER-tier/long-tail citations, or is author-year-only.
+6. Compute one updated end-to-end coverage table: abbreviation tier +
+   aabiblio.csv-resolved author-year + still-unresolved, replacing
+   the pilot report's "general-knowledge ceiling" framing with the
+   real number. Extend =track_b_pilot_results.org= with this as a new
+   section (or a clearly-linked follow-on doc if that gets unwieldy)
+   — don't duplicate the method/tier-total sections that still hold.
+
+Out of scope for this task: no FastAPI backend work, no PAA URI
+minting or GraphDB writes, no WorldCat/CrossRef cross-referencing
+beyond what =aabiblio.csv= already contains. Those wait on Cliff's
+Phase 2 decision below, which this task's output feeds.
+
+Completion criterion: an updated report with raw and diacritic-
+normalized match rates and a real end-to-end coverage table, plus a
+short Analysis addendum in the linked =docs/forum.org= entry pointing
+to it (pointer only, per the usual bloat-control convention — not the
+full table inline in the forum).
+
 ** TODO Reassess Phase 2 (FastAPI backend) start date
 :PROPERTIES:
 :CUSTOM_ID: track-b/phase2-start
 :ASSIGNEES: Cliff
-:DEPENDS: track-b/citation-resolution-pilot
+:DEPENDS: track-b/citation-resolution-tier0-integration
 :END:
 =PROJECT_STATUS_2026-07-16.md= named Phase 2 as the "logical pickup
-point." Holding that decision open pending the citation-resolution
-pilot above — building the backend around an unvalidated splitting
-heuristic risks the same false start NVS avoided by piloting first.
+point." Holding that decision open pending the Tier-0 integration
+above — the citation-resolution pilot alone left the author-year
+tier's real coverage an open question; this is the number that
+actually informs whether/how to proceed.
