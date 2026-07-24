@@ -162,12 +162,24 @@ multiple volume/entry locators; plain-text journal citations with no
 detail:
 [[file:citation-resolution/track_b_sample_findings.org][docs/citation-resolution/track_b_sample_findings.org]].
 
+**** Analysis
+[2026-07-24] Pilot complete — script, data, and full write-up at
+=src/paa_graph_kb/utils/citation_resolution_pilot.py= and
+[[file:citation-resolution/track_b_pilot_results.org][docs/citation-resolution/track_b_pilot_results.org]].
+Headline: the cascade's cheap half held up (abbreviation tier
+near-free; 1,677-key author-year compression confirmed on the full
+corpus), but general-knowledge resolution of author-year keys alone
+only reaches real (HIGH) confidence for ~21% of occurrences — well
+below NVS's ~90%, likely because this tier is identifying exact
+publication titles/editions rather than recognizing well-known people.
+Recommendation: proceed, but pair Phase 2's Resolver step with an
+actual external bibliographic lookup (WorldCat/CrossRef) rather than
+relying on general knowledge to resolve outright.
+
 <2026-07-24 Fri 16:23> See [[file:~/repos/gh/perseus-aa/paa_graph_kb/agenda.org::note-2026-07-24-1][note in the agenda]]. This is very important;
 we can use [[file:~/repos/gh/perseus-aa/paa_graph_kb/data/bibliography/aabiblio.csv][this bibliography file]] in our research.
 
 **** Decision
-[to be recorded] — pending the actual resolution pilot (build the
-abbreviation lookup + the 1,682-key author-year table, size the long
-tail precisely) — see
-[[file:../agenda.org::#track-b/citation-resolution-pilot][agenda.org]],
-before committing to Phase 2 (FastAPI backend).
+[to be recorded] — see
+[[file:../agenda.org::#track-b/phase2-start][agenda.org]] for the
+Phase 2 start-date decision this pilot was gating.

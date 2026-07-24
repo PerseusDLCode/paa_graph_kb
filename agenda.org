@@ -73,19 +73,27 @@ Met.
 
 * Track B — Annotation / Curation
 
-** TODO Pilot citation-resolution cascade against real Perseus bibliography data
+** DONE Pilot citation-resolution cascade against real Perseus bibliography data
 :PROPERTIES:
 :CUSTOM_ID: track-b/citation-resolution-pilot
 :ASSIGNEES: Claude Code
 :SOURCE: chat/2026-07-23
 :DEPENDS: track-b/citation-resolution-approach
 :END:
+Done [2026-07-24]: write-up at
+[[file:docs/citation-resolution/track_b_pilot_results.org]], Analysis
+recorded in
+[[file:docs/forum.org::#track-b/citation-resolution-approach][docs/forum.org]].
+Script on =feature/track-b/citation-resolution-pilot-cascade-pilot=
+(not yet merged). Feeds the Decision below.
+
 First-pass shape check done (Claude Chat, 2026-07-23) — see
 [[file:docs/citation-resolution/track_b_sample_findings.org]]. Confirmed
 the cascade shape fits: 8,510 of 12,746 =<bibl>= citations collapse to
 1,682 unique author-year keys; the rest are mostly ~15-20 standard
-abbreviations (CVA, BMCRE, LIMC, RIC, &c.). Remaining for this task,
-now a Claude Code job (real parsing + resolution, not a quick script):
+abbreviations (CVA, BMCRE, LIMC, RIC, &c.). This task (a Claude Code
+job — real parsing + resolution, not a quick script) picked up from
+there; see the Done note above for the result. Original task framing:
 See
 [[file:docs/forum.org::#track-b/citation-resolution-approach][docs/forum.org]]
 for the Research (NVS's tiered resolution cascade as a model, and why
