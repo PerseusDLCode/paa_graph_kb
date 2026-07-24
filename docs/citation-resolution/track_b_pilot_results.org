@@ -1,0 +1,154 @@
+#+title: Track B: Citation-Resolution Pilot Results
+#+date: <2026-07-24 Fri>
+#+description: Corpus-wide extraction/classification pass and top-100
+#+description: author-year resolution attempt, following on from
+#+description: track_b_sample_findings.org's shape check. Completion
+#+description: artifact for agenda.org#track-b/citation-resolution-pilot.
+
+* Method
+
+Formalized the shape check's ad hoc script as
+=src/paa_graph_kb/utils/citation_resolution_pilot.py=, run against the
+full corpus (=data/perseus/objects.json=, 5,859 objects). Two changes
+from the shape check, closing gaps it flagged as unexercised:
+
+- Extracts citation-shaped text found *outside* =<bibl>= tags as well as
+  inside them (the "untagged plain-text citation" case).
+- Detects a single =<bibl>= span bundling multiple internal locators
+  (the LIMC-shaped case) as its own category, rather than treating it
+  as one clean citation.
+
+Classification logic and known limitations are documented in the
+script's docstrings; three real bugs were caught and fixed during
+development by spot-checking random samples per tier before trusting
+the output — worth noting since they would have silently distorted the
+findings below: (1) HTML attribute quotes (=rend="ital"=) were
+false-triggering a "quoted title" classification before nested markup
+was stripped first; (2) the author-year pattern missed multi-initial
+forms ("C.M. Edwards 1985") and lowercase name-prefixes ("von Gerkan
+1963"); (3) literal newlines embedded in the source HTML weren't being
+stripped, corrupting some keys. All three are fixed in the committed
+script; see git history for the before/after spot-check samples if
+useful.
+
+Outputs: =data/reports/citation-resolution/bibliography_citations_full.csv=
+(every extracted citation, tier-classified) and
+=data/reports/citation-resolution/bibliography_author_year_keys.csv=
+(the unique author-year key frequency table, with a resolution attempt
+for the top 100 keys — see below).
+
+* Findings
+
+** Overall tier totals
+
+14,079 total citation-shaped spans extracted (12,746 =<bibl>=-tagged, the
+rest recovered from untagged text):
+
+| Tier         | Occurrences | Notes                                    |
+|--------------+-------------+-------------------------------------------|
+| AUTHOR_YEAR  |       8,397 | 1,677 unique keys (~5:1 compression)      |
+| ABBREVIATION |       1,873 | matches the 15-entry manual mapping       |
+| OTHER        |       3,809 | see long-tail breakdown below             |
+
+Close to the shape check's 12,746 / 8,510 / 1,682 (the small deltas are
+expected: this pass also captures untagged citations and separates
+genuinely bundled =<bibl>= spans out of the abbreviation/author-year
+counts rather than folding them in).
+
+53.2% of the 1,677 unique author-year keys (893) occur only once —
+same long-tail shape the shape check found, and the same shape NVS
+found for bare commentator names.
+
+** Abbreviation tier: confirmed cheap to close
+
+=data/reconciliation/bibliography_abbreviations_manual.txt= (15 entries:
+ABV, ARV2, Add2, Para, BMC, BMCRE, BMCRR, RIC, RRC, LIMC, PECS, EAA, FR,
+JHS, CVA) accounts for all 1,873 ABBREVIATION-tier occurrences. Labels
+only, no external-authority cross-check performed (no WorldCat/CrossRef
+lookup) and no PAA URI minted — see file header for the caveat. This
+tier behaved exactly as the shape check predicted: small closed
+vocabulary, same convention as the existing AAT manual-mapping files,
+effectively free once written.
+
+** Author-year tier: compression confirmed, general-knowledge resolution weaker than hoped
+
+Resolved the top 100 author-year keys by occurrence count (covering
+53.8% of all 8,397 author-year occurrences) via general
+classical-archaeology domain knowledge — no local bibliography or
+external authority was available to check against, so every entry
+carries an explicit, honest confidence flag rather than a false
+certainty:
+
+| Confidence | Unique keys | Occurrences | % of all author-year occurrences |
+|------------+-------------+-------------+-----------------------------------|
+| HIGH       |          34 |       1,773 | 21.1%                             |
+| MEDIUM     |          19 |       1,426 | 17.0%                             |
+| LOW        |          33 |         986 | 11.7%                             |
+| AMBIGUOUS  |          10 |         333 | 4.0%                              |
+| not attempted (outside top 100) | 1,581 | 3,879 | 46.2%             |
+
+Full table (all 1,677 keys, with resolution/confidence for the top 100)
+in =data/reports/citation-resolution/bibliography_author_year_keys.csv=.
+
+This is the pilot's central finding, and it cuts against a simple "yes,
+proceed exactly as sketched" reading of the cascade design: general
+knowledge alone gets barely a fifth of author-year occurrences to HIGH
+confidence, not the ~90% NVS reported for its Tier 0-3. The likely
+reason is a difference in what's being resolved, not a flaw in the
+cascade shape itself — NVS's Tier 1 was identifying *people* (well-known
+Shakespeare editors, a recognition task), while this tier is identifying
+the *exact title/edition* of a specialized scholarly publication (a
+library-catalog lookup task). General knowledge is good at recognizing
+"Stewart 1990 is Andrew Stewart's /Greek Sculpture: An Exploration/"
+for a well-known standard reference, but genuinely unreliable at
+"Zaphiropoulou 1983 is exactly which of her publications" without a
+real bibliography to check against.
+
+** Long-tail bucket: sized precisely, four distinct shapes
+
+3,809 OTHER-tier occurrences, broken out (the shape check left this
+"not sized precisely"):
+
+| Subtype            | Count | Shape                                                          |
+|---------------------+-------+-------------------------------------------------------------------|
+| OTHER_UNCLASSIFIED  | 1,644 | full citations (author, title, year, locator) not in the compact "Author Year" abbreviation style — e.g. "Amyx, D.A., and P. Lawrence, Corinth VII, 2 (1975)..." |
+| UNTAGGED            | 1,148 | citation-shaped text outside any =<bibl>= tag                    |
+| BUNDLED_LOCATOR     |   693 | one =<bibl>= tag holding multiple internal locators (the LIMC case) |
+| QUOTED_TITLE        |   324 | full journal-article citations with a quoted article title       |
+
+None of this bucket was resolved in this pilot; it's the pile that
+would route to Cliff/Giulia (or a more capable parser) in a real
+cascade, per NVS's Tier 4/5 pattern.
+
+** Data-quality note
+
+Several author names in the extracted keys show dropped diacritics
+(e.g. "Vierneisel-Schlrb" for what is almost certainly
+Vierneisel-Schlörb; "Blmel" for Blümel) — an encoding issue in the
+source corpus, not a bug in this pilot's extraction. Worth flagging
+separately since it could cause the same author to key under two
+different spellings elsewhere in the corpus if diacritics are dropped
+inconsistently; not investigated further here.
+
+* Recommendation
+
+The cascade's cheap half held up: the abbreviation tier is genuinely
+near-free (15 hand-written mappings closed 1,873 occurrences), and the
+author-year compression is real (1,677 keys standing in for 8,397
+occurrences bounds the resolution cost as NVS predicted). The
+expensive half is more expensive than the NVS comparison suggested:
+general-knowledge resolution of author-year keys tops out around a
+fifth of occurrences at real confidence, not the ~90% NVS reported for
+its structurally different problem.
+
+Practical implication for Phase 2, if adopted: don't design the
+Resolver step to rely on general/LLM knowledge alone for the
+author-year tier, the way this pilot did to test the ceiling. Pair it
+with an actual external bibliographic lookup (WorldCat/CrossRef, per
+=docs/curation_architecture_analysis.md='s original Resolver sketch) so
+"general knowledge" becomes a candidate-suggestion step feeding a real
+lookup, not the resolution itself. The abbreviation tier and the
+long-tail sizing above are solid enough to build on as-is.
+
+Decision on whether/how to proceed rests with Cliff — see
+[[file:../../agenda.org::#track-b/phase2-start][agenda.org]].
