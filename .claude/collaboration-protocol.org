@@ -228,19 +228,45 @@ i.e., anything both tracks depend on:
 * Git Conventions
 
 Implementation work happens on a feature branch, never directly on
-=main=. Branch names follow =feature/CUSTOM_ID-short-description=.
+=main=/=dev=. Branch names follow =feature/CUSTOM_ID-short-description=.
 Claude Code checks for an existing branch (=git branch -a=) before
 assuming it needs to create one.
 
 Coordination-file changes (=agenda.org=, =docs/forum.org=,
-=.claude/guidelines.org=) commit directly to =main=, not on feature
-branches. They're the continuous cross-task record, not a
+=.claude/guidelines.org=) commit directly to the current integration
+branch (=dev=, kept fast-forward-identical to =main= in this repo), not
+on feature branches. They're the continuous cross-task record, not a
 deliverable of any one task — and with two humans and two tracks
 potentially touching these files independently, tying their history
 to a branch that gets merged and deleted would be a worse mismatch
 here than it was for a single-thread project. In practice: commit
-coordination-file edits to =main= first, merge the feature branch
+coordination-file edits to =dev= first, merge the feature branch
 afterward.
+
+** Coordination-File Hygiene
+
+The rule above is necessary but not sufficient — it says where
+coordination-file commits should end up, not how to avoid the
+branches disagreeing about their state in the meantime. 2026-07-24
+is the worked example: Claude Code's implementation commit stayed on
+a feature branch while its "mark the task DONE, add the Analysis
+section" commit landed on =dev= — splitting one task's substance and
+its bookkeeping across two branches that never got reconciled before
+a third edit (Cliff's, in Emacs) landed on the feature branch's now-
+stale version of the same files. The conflict that produced was
+trivial to resolve; the divergence that caused it wasn't something
+any one participant would have noticed without checking.
+
+Three concrete habits, for all three participants alike:
+
+- *Sync before you edit.* Before opening =agenda.org= or
+  =docs/forum.org=, check =git status= / =git log= against =dev= — merged? behind? Cheap to check, expensive to discover after the fact. This applies whether the edit is Cliff typing in Emacs, Claude Code about to branch for a new task, or Claude Chat about to call an edit tool.
+- *Land a task's substance and its bookkeeping together.* Don't split "the actual work" and "marking it DONE / recording the Analysis section" across two commits on two different branches. If a task's implementation lives on a feature branch, its DONE-marking and Analysis section go on that same branch, merged to =dev= together — not written directly to =dev= while the branch that did the work sits unmerged.
+- *Stay additive, not editorial, in the coordination files.* New headline, new dated addendum, new paragraph appended after existing content — not rewriting or restructuring another participant's existing text. This is most of why the actual conflict on 2026-07-24 was a two-line, obviously-resolvable one despite the branch divergence behind it: both sides had added text after the same paragraph rather than editing each other's prose. Keep doing that even when the underlying branch hygiene slips.
+
+None of this replaces the sync-before-edit habit with tooling — see
+"What This Protocol Does Not Cover" below on why that discipline
+stays social rather than automated for now.
 
 * What This Protocol Does Not Cover
 
