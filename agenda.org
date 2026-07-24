@@ -104,6 +104,12 @@ Completion criterion: a Research write-up (in the linked forum entry
 or a =docs/= report it points to) showing Tier coverage against a real
 sample, informing a Decision on whether/how to proceed to Phase 2.
 
+<<note-2026-07-24-1>> <2026-07-24 Fri 16:14> I discovered that a full bibliography for the
+Art and Archaeology component of Perseus was created many years
+ago. Two versions of it exist now, as Google Spreadsheets. I have
+downloaded the more comprehensive one (prepared by Alison Babeu) into
+a new directory [[file:data/bibliography/][data/bibliography]].
+
 ** TODO Reassess Phase 2 (FastAPI backend) start date
 :PROPERTIES:
 :CUSTOM_ID: track-b/phase2-start

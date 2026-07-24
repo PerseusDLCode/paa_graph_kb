@@ -162,6 +162,9 @@ multiple volume/entry locators; plain-text journal citations with no
 detail:
 [[file:citation-resolution/track_b_sample_findings.org][docs/citation-resolution/track_b_sample_findings.org]].
 
+<2026-07-24 Fri 16:23> See [[file:~/repos/gh/perseus-aa/paa_graph_kb/agenda.org::note-2026-07-24-1][note in the agenda]]. This is very important;
+we can use [[file:~/repos/gh/perseus-aa/paa_graph_kb/data/bibliography/aabiblio.csv][this bibliography file]] in our research.
+
 **** Decision
 [to be recorded] — pending the actual resolution pilot (build the
 abbreviation lookup + the 1,682-key author-year table, size the long
