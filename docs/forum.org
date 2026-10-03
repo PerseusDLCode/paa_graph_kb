@@ -176,7 +176,65 @@ Recommendation: proceed, but pair Phase 2's Resolver step with an
 actual external bibliographic lookup (WorldCat/CrossRef) rather than
 relying on general knowledge to resolve outright.
 
+<2026-07-24 Fri 16:23> See [[file:~/repos/gh/perseus-aa/paa_graph_kb/agenda.org::note-2026-07-24-1][note in the agenda]]. This is very important;
+we can use [[file:~/repos/gh/perseus-aa/paa_graph_kb/data/bibliography/aabiblio.csv][this bibliography file]] in our research.
+
 **** Decision
 [to be recorded] — see
 [[file:../agenda.org::#track-b/phase2-start][agenda.org]] for the
 Phase 2 start-date decision this pilot was gating.
+
+** Track B: aabiblio.csv validated as the pilot's missing Tier-0 lookup
+:PROPERTIES:
+:CUSTOM_ID: track-b/aa-bibliography-tier0
+:ASSIGNEES: Cliff, Claude Chat
+:SOURCE: chat/2026-07-24
+:DISPOSITION: adopt
+:END:
+
+Cliff located =data/bibliography/aabiblio.csv= (3,537 entries,
+compiled by Alison Babeu, apparently present since the HyperCard era
+but not surfaced in recent database-browser versions). The pilot's
+own recommendation (=track_b_pilot_results.org=) was to pair
+general-knowledge resolution with a real external lookup rather than
+relying on it alone — this is very plausibly that lookup, checked
+below rather than assumed.
+
+**** Research
+[2026-07-24] Matched the pilot's extracted author-year keys
+(=data/reports/citation-resolution/bibliography_author_year_keys.csv=,
+1,677 unique keys) against =aabiblio.csv='s =Identifier= column by exact
+string:
+
+- 1,388 of 1,677 unique keys match exactly (82.8%).
+- Weighted by occurrence: 7,687 of 8,397 author-year citations
+  (91.5%) — up from the pilot's ~21% general-knowledge HIGH-confidence
+  ceiling.
+- The largest unmatched keys are almost entirely the diacritic-drop
+  cases the pilot's own data-quality note already flagged
+  (=Vierneisel-Schlrb= for Vierneisel-Schlörb, =Blmel= for Blümel,
+  =Ssserott= for Süsserott, =Mtzger= for M[e]tzger) — a normalization
+  pass on both sides (NFKD-strip accents, or better, restore the
+  corpus's dropped diacritics) should close a real fraction of the
+  remaining 8.5%, not require new resolution work.
+
+Also checked digital-surrogate coverage, since the vision doc's Track
+B goal is linking citations to actual representations of the
+scholarship, not just identifying them: =Bibliographic URL
+(Worldcat, etc.)= is populated for 84.8% of entries — good stable
+catalog identity — but =HathiTrust=/=Internet Archive=/=Google Books=
+are sparse (1.4%/0.7%/0.5%). So this discovery solves *identification*
+well, but not the harder *full-text linking* problem — expect the
+same OCR/access wall NVS hit, not a shortcut around it.
+
+Not yet done: verifying that exact-string match implies *correct*
+match (no false positives from author-year collisions — though the
+existing =a=/=b= disambiguation suffixes seen in the extracted keys,
+e.g. =Boardman 1985a=, suggest the corpus already handles same-author-
+same-year collisions, which is a good sign); confirming whether
+=aabiblio.csv='s =Identifier= convention is the same one used to key
+abbreviation-tier and long-tail citations, or only author-year ones.
+
+**** Decision
+[2026-07-24] Cliff: proceed. Task at
+[[file:../agenda.org::#track-b/citation-resolution-tier0-integration][agenda.org]].
